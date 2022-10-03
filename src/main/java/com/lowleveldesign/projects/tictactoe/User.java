@@ -11,8 +11,8 @@ public class User {
         this.userId = userId;
     }
 
-    public Player getTicTacToePlayer(TicTacToeSymbol ticTacToeSymbol) {
-        return new Player(this, ticTacToeSymbol);
+    public Player getTicTacToePlayer(Piece piece) {
+        return new Player(this, piece);
     }
 
     public String getFirstName() {

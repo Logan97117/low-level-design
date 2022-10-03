@@ -2,18 +2,18 @@ package com.lowleveldesign.projects.tictactoe;
 
 public class Player {
     private User user;
-    private TicTacToeSymbol ticTacToeSymbol;
+    private Piece piece;
 
-    public Player(User user, TicTacToeSymbol ticTacToeSymbol) {
+    public Player(User user, Piece piece) {
         this.user = user;
-        this.ticTacToeSymbol = ticTacToeSymbol;
+        this.piece = piece;
     }
 
     public User getUser() {
         return user;
     }
 
-    public TicTacToeSymbol getTicTacToeSymbol() {
-        return ticTacToeSymbol;
+    public Piece getPiece() {
+        return piece;
     }
 }

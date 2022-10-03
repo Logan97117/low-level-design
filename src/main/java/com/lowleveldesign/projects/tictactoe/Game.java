@@ -1,42 +1,58 @@
 package com.lowleveldesign.projects.tictactoe;
 
-public abstract class Game {
-    protected Player firstPlayer;
-    protected Player secondPlayer;
-    protected TicTacToeSymbol firstPlayerSymbol;
-    protected TicTacToeSymbol secondPlayerSymbol;
-    protected TicTacToeSymbol currentPlayerSymbol;
-    protected TicTacToeSymbol winnerSymbol;
-    protected GameStatus gameStatus;
-    protected Board board;
-    public Game(Player firstPlayer, Player secondPlayer, int size) {
-        this.firstPlayer = firstPlayer;
-        this.secondPlayer = secondPlayer;
-        this.firstPlayerSymbol = firstPlayer.getTicTacToeSymbol();
-        this.secondPlayerSymbol = secondPlayer.getTicTacToeSymbol();
-        this.board = new Board(size);
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Game {
+    private Queue<Player> players;
+    private Board board;
+    private Player winner;
+    private GameStatus gameStatus;
+    public Game(int boardSize, Player player1, Player player2) {
+        this.players = new LinkedList<>();
+        this.board = new Board(boardSize);
         this.gameStatus = GameStatus.IN_PROGRESS;
-        this.currentPlayerSymbol = this.firstPlayerSymbol;
+        this.players.add(player1);
+        this.players.add(player2);
     }
 
-    public abstract void makeMove(int row, int col);
-
-    public GameStatus getGameStatus() {
-        return gameStatus;
-    }
-
-    public Player getWinner() {
-        if(this.winnerSymbol == null) {
-            System.out.println("No one has won this game");
-            return null;
+    public void makeMove(int row, int column) {
+        if(this.gameStatus == GameStatus.FINISHED) {
+            System.out.println("This game has already been won by: " + this.winner.toString());
+            return;
         }
 
-        if(this.winnerSymbol.equals(this.firstPlayerSymbol))
-            return this.firstPlayer;
+        if(this.gameStatus == GameStatus.DRAW) {
+            System.out.println("This game has been drawed");
+            return;
+        }
 
-        if(this.winnerSymbol.equals(this.secondPlayerSymbol))
-            return this.secondPlayer;
+        Player currentPlayer = this.players.peek();
+        boolean isMoveValid = this.board.makeMove(currentPlayer.getPiece(), row-1, column-1);
 
-        return null;
+        if(!isMoveValid) {
+            System.out.println("This move is not valid.");
+            return;
+        }
+
+        if(this.board.allCellsOccupied()) {
+            this.gameStatus = GameStatus.DRAW;
+            System.out.println("Game draw");
+            return;
+        }
+
+        if(this.board.checkWinner(currentPlayer.getPiece(),row-1, column-1)) {
+            this.winner = currentPlayer;
+            this.gameStatus = GameStatus.FINISHED;
+            System.out.println("Game over, the winner is: " + this.winner.toString());
+            this.board.printBoardStatus();
+            return;
+        }
+
+        this.players.poll();
+        this.players.add(currentPlayer);
+        this.board.printBoardStatus();
+        return;
     }
 }

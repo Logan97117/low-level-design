@@ -1,6 +1,6 @@
 package com.lowleveldesign.projects.tictactoe;
 
-public enum TicTacToeSymbol {
+public enum Piece {
     X,
     O,
 }

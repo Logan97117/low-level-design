@@ -8,10 +8,18 @@ public class Client {
         User myUser = new User("Pratyush", "Prateek", "ABCD@gmail.com");
         User secondUser = new User("Windows", "PC", "windows@windows.com");
 
-        Game tictactoe = new OneVPCGame(myUser.getTicTacToePlayer(TicTacToeSymbol.O), secondUser.getTicTacToePlayer(TicTacToeSymbol.X), 3);
-        tictactoe.makeMove(1,1);
-        tictactoe.makeMove(3,3);
-        tictactoe.makeMove(2,2);
-        tictactoe.makeMove(3,1);
+        //Players
+        Player first = myUser.getTicTacToePlayer(Piece.X);
+        Player second = secondUser.getTicTacToePlayer(Piece.O);
+
+        //Game
+        Game game = new Game(3, first, second);
+        game.makeMove(1,1);
+        game.makeMove(1,2);
+        game.makeMove(2,2);
+        game.makeMove(3,3);
+        game.makeMove(2,1);
+        game.makeMove(1,3);
+        game.makeMove(3,1);
     }
 }

@@ -1,37 +1,26 @@
 package com.lowleveldesign.projects.tictactoe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class Board {
-    private Cell cells[][];
+    private Piece cells[][];
     private int boardSize;
     private int remainingCells;
     public Board(int boardSize) {
         this.boardSize = boardSize;
-        this.cells = new Cell[boardSize][boardSize];
-        for(int i = 0; i<boardSize; i++) {
-            for(int j = 0; j<boardSize; j++)
-                this.cells[i][j] = new Cell(i, j);
-        }
-
+        this.cells = new Piece[boardSize][boardSize];
         this.remainingCells = boardSize*boardSize;
     }
 
-    public boolean makeMove(TicTacToeSymbol player, int row, int col) {
-        if(this.cells[row][col].getOccupant() != null)
+    public boolean makeMove(Piece piece, int row, int col) {
+        if(this.cells[row][col] != null) {
+            System.out.println("The cell is already occupied");
             return false;
+        }
 
-        this.cells[row][col].setOccupant(player);
-        this.remainingCells--;
-        return true;
-    }
-
-    public boolean makeRandomMove(TicTacToeSymbol player) {
-        //Logic for making random move
-        Cell randomFreeCell = getRandomFreeCell();
-        randomFreeCell.setOccupant(player);
+        this.cells[row][col] = piece;
         this.remainingCells--;
         return true;
     }
@@ -41,7 +30,7 @@ public class Board {
         for(int i = 0; i<this.boardSize; i++) {
             board.append("|");
             for(int j = 0; j<this.boardSize; j++) {
-                board.append(this.cells[i][j].getOccupant().toString());
+                board.append(this.cells[i][j] == null? "___": " " + this.cells[i][j].toString() + " ");
                 board.append("|");
             }
             board.append("\n");
@@ -50,63 +39,56 @@ public class Board {
         System.out.println(board.toString());
     }
 
-    public TicTacToeSymbol evaluateWinner() {
-        //Each row, column
-        //First diagonal
-        //Second diagonal
+    List<List<Integer>> getFreeCells() {
+        List<List<Integer>> freeCells = new ArrayList<>();
+        for(int i = 0; i<this.boardSize;i++) {
+            for(int j = 0; j<this.boardSize; j++) {
+                if(this.cells[i][j] == null)
+                    freeCells.add(Arrays.asList(new Integer[]{i+1, j+1}));
+            }
+        }
+
+        return freeCells;
+    }
+
+    public boolean checkWinner(Piece piece, int row, int column) {
+        boolean rowMatch = true;
+        boolean colMatch = true;
+        boolean diagonalMatch = true;
+        boolean secondDiagonalMatch = true;
+
         for(int i = 0; i<this.boardSize; i++) {
-            for(int j = 1; j<this.boardSize; j++) {
-                if(this.cells[i][j].getOccupant() != this.cells[i][j-1].getOccupant())
-                    break;
-
-                if(j == this.boardSize-1)
-                    return this.cells[i][j].getOccupant();
+            if(this.cells[row][i] != piece) {
+                rowMatch = false;
+                break;
             }
         }
 
-        for(int j = 0; j< this.boardSize; j++) {
-            for(int i = 1; i<this.boardSize; i++) {
-                if(this.cells[i][j].getOccupant() != this.cells[i-1][j].getOccupant())
-                    break;
-
-                if(i == this.boardSize-1)
-                    return this.cells[i][j].getOccupant();
+        for(int i = 0; i<this.boardSize; i++) {
+            if(this.cells[i][column] != piece) {
+                colMatch = false;
+                break;
             }
         }
 
-        for(int i = 1; i<this.boardSize; i++) {
-            if(this.cells[i][i].getOccupant() != this.cells[i-1][i-1].getOccupant())
+        for(int i = 0; i<this.boardSize; i++) {
+            if((this.cells[i][i] != piece) || (row != column)) {
+                diagonalMatch = false;
                 break;
-
-            if(i == this.boardSize-1)
-                return this.cells[i][i].getOccupant();
+            }
         }
 
-        for(int i = 1; i<this.boardSize; i++) {
-            if(this.cells[i][this.boardSize-i-1].getOccupant() == this.cells[i-1][this.boardSize - i].getOccupant())
+        for(int i = 0; i<this.boardSize; i++) {
+            if((this.cells[i][this.boardSize-i-1] != piece) || (row + column != this.boardSize-1)) {
+                secondDiagonalMatch = false;
                 break;
-
-            if(i == this.boardSize-1)
-                return this.cells[i][this.boardSize-1-i].getOccupant();
+            }
         }
 
-        return null;
+        return rowMatch || colMatch || diagonalMatch || secondDiagonalMatch;
     }
 
     public boolean allCellsOccupied() {
         return this.remainingCells == 0;
-    }
-
-    private Cell getRandomFreeCell() {
-        List<Cell> freeCells = new ArrayList<>();
-        for(int i = 0; i<this.boardSize; i++) {
-            for(int j = 0; j<this.boardSize; j++) {
-                if(this.cells[i][j].getOccupant() == null)
-                    freeCells.add(this.cells[i][j]);
-            }
-        }
-
-        int randomIdx = new Random().nextInt(freeCells.size());
-        return freeCells.get(randomIdx);
     }
 }
