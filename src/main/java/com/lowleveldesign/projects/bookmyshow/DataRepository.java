@@ -1,14 +1,22 @@
 package com.lowleveldesign.projects.bookmyshow;
 
-import java.util.List;
+import com.lowleveldesign.projects.bookmyshow.enums.PricePlan;
+import com.lowleveldesign.projects.bookmyshow.exceptions.EntityNotFoundException;
+import com.lowleveldesign.projects.bookmyshow.models.*;
+
+import java.util.*;
 
 public class DataRepository {
     private static DataRepository instance;
-    private MovieRepository movieRepository;
-    private TheaterRepository theaterRepository;
+    private Map<String,List<Theater>> theaters;
+    private Map<String, Movie> movies;
+    private Map<String, Show> shows;
+    private Map<String,User> users;
     private DataRepository() {
-        this.theaterRepository = TheaterRepository.getInstance();
-        this.movieRepository = MovieRepository.getInstance();
+        this.theaters = new HashMap<>();
+        this.movies = new HashMap<>();
+        this.shows = new HashMap<>();
+        this.users = new HashMap<>();
     }
 
     public static DataRepository getInstance() {
@@ -21,18 +29,77 @@ public class DataRepository {
         return DataRepository.instance;
     }
 
-    public List<MovieShowSearchResult> getAllMovieShowsForMovie(String movieId) {
-        return this.theaterRepository.getAllMovieShowsForMovie(movieId);
+    public User getUserById(String id) {
+        return this.users.get(id);
     }
 
-    public void lockSeats(User user, MovieShowSearchResult movieShowSearchResult, List<Integer> seats) {
-        movieShowSearchResult.getMovieShow().getSeatingArrangement().lockSeats(seats);
+    public void addUser(String id, String firstName, String lastName) {
+        this.users.put(id, new User(id,firstName, lastName));
     }
 
-    public BookingTicket bookSeats(User user, MovieShowSearchResult movieShowSearchResult, List<Integer> seats) { int totalCost = movieShowSearchResult.getMovieShow().getSeatingArrangement().bookSeatsAndReturnCost(user, seats);
-       BookingTicket ticket = new BookingTicket(movieShowSearchResult.getMovieShow(), seats, totalCost);
-       user.addBookingHistory(ticket);
-       return ticket;
+    public List<Theater> getTheatersByCity(String cityName) {
+        if(!theaters.containsKey(cityName))
+            return new ArrayList<>();
 
+        return theaters.get(cityName);
+    }
+
+    public Movie getMovieById(String movieId) {
+        return movies.get(movieId);
+    }
+
+    public Show getShowById(String showId) {
+        return shows.get(showId);
+    }
+
+    public void addTheater(String id, String address, String city) {
+        theaters.putIfAbsent(city, new ArrayList<>());
+        theaters.get(city).add(new Theater(id, address, city));
+    }
+
+    public void addScreen(String theaterId, String id, int numSeats, PricePlan pricePlan) {
+        Theater theater = getTheaterById(theaterId);
+
+        if(theater == null)
+            throw new EntityNotFoundException("Theater not found with given ID");
+
+        theater.addScreen(id, numSeats, pricePlan);
+    }
+
+    public Theater getTheaterById(String theaterId) {
+        for(List<Theater> theaters: theaters.values()) {
+            for(Theater currTheater: theaters) {
+                if(currTheater.getId().equals(theaterId))
+                    return currTheater;
+            }
+        }
+
+        return null;
+    }
+
+    public void addShow(String theaterId, String showId,  String movieId, String screenId, Date startDateTime) {
+        Movie movie = movies.get(movieId);
+        Theater theater = getTheaterById(theaterId);
+
+        if(movie == null || theater == null)
+            throw new EntityNotFoundException("Movie with given ID not found");
+
+        Screen screen = theater.getScreenById(screenId);
+
+        if(screen == null)
+            throw new EntityNotFoundException("Screen with given ID not found");
+
+        Show show = new Show(showId , movie, screen, startDateTime);
+        this.shows.put(showId, show);
+    }
+
+    public List<Show> getShowsForMovie(String movieId, String cityName) {
+        List<Show> results = new ArrayList<>();
+        for(Show show: this.shows.values()) {
+            if(show.getMovie().getId().equals(movieId) && show.getScreen().getTheater().getCity().equals(cityName.toLowerCase()))
+                results.add(show);
+        }
+
+        return results;
     }
 }

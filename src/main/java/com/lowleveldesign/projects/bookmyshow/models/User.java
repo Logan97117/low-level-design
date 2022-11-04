@@ -1,4 +1,7 @@
-package com.lowleveldesign.projects.bookmyshow;
+package com.lowleveldesign.projects.bookmyshow.models;
+
+import com.lowleveldesign.projects.bookmyshow.BookingHistory;
+import com.lowleveldesign.projects.bookmyshow.BookingTicket;
 
 import java.util.List;
 

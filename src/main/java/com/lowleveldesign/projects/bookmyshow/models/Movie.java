@@ -1,4 +1,4 @@
-package com.lowleveldesign.projects.bookmyshow;
+package com.lowleveldesign.projects.bookmyshow.models;
 
 public class Movie {
     private String id;
